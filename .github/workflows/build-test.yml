@@ -59,11 +59,11 @@ jobs:
         if: always()
         with:
           name: Download cypress test videos
-          path: cypress/videos/
+          path: cypress/videos/${{ matrix.browsers }}
           retention-days: 5
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Download cypress test failed screenshots
-          path: cypress/screenshots/
+          path: cypress/screenshots/${{ matrix.browsers }}
           retention-days: 5
