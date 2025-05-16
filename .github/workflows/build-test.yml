@@ -39,6 +39,14 @@ jobs:
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v4
+      - name: Restore cache (node_modules)
+        id: cache-primes-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            /home/runner/.cache/Cypress
+          key: ${{ runner.os }}--node-modules-${{ hashFiles('**/package-lock.json') }} ##{ hashFiles('**/package-lock.json') }}
       - uses: cypress-io/github-action@v6
         with:
           install: false
@@ -48,15 +56,6 @@ jobs:
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
 
       - run: echo "🍏 This job's status is cuurently ${{ job.status }}."
-
-      - name: Restore cache (node_modules)
-        id: cache-primes-restore
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            node_modules
-            /home/runner/.cache/Cypress
-          key: ${{ runner.os }}--node-modules-${{ hashFiles('**/package-lock.json') }} ##{ hashFiles('**/package-lock.json') }}
 
       - uses: actions/upload-artifact@v4
         if: always()
