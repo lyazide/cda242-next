@@ -38,7 +38,7 @@ jobs:
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
 
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+      - run: echo "🍏 This job's status is cuurently ${{ job.status }}."
       - name: Restore cache (node_modules)
         id: cache-primes-restore
         uses: actions/cache/restore@v4
