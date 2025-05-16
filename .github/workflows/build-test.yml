@@ -23,6 +23,7 @@ jobs:
         with:
           path: |
             node_modules
+            /home/runner/.cache/Cypress
           key: ${{ runner.os }}--node-modules-${{ hashFiles('**/package-lock.json') }} ##{ hashFiles('**/package-lock.json') }}
   Test:
     runs-on: ubuntu-latest
@@ -44,6 +45,7 @@ jobs:
         with:
           path: |
             node_modules
+            /home/runner/.cache/Cypress
           key: ${{ runner.os }}--node-modules-${{ hashFiles('**/package-lock.json') }} ##{ hashFiles('**/package-lock.json') }}
       - name: Test
         run: npm run e2e:headless
