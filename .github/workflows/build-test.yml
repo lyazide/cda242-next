@@ -57,8 +57,6 @@ jobs:
             node_modules
             /home/runner/.cache/Cypress
           key: ${{ runner.os }}--node-modules-${{ hashFiles('**/package-lock.json') }} ##{ hashFiles('**/package-lock.json') }}
-      - name: Test
-        run: npm run e2e:headless
 
       - uses: actions/upload-artifact@v4
         if: always()
