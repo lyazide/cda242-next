@@ -17,6 +17,13 @@ jobs:
       - name: Build
         run: npm run build
       - run: echo "🍏 This job's status is ${{ job.status }}."
+      - name: Save cache (node_modules)
+        id: cache-primes-save
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}--node-modules-${{ hashFiles('**/package-lock.json') }} ##{ hashFiles('**/package-lock.json') }}
   Test:
     runs-on: ubuntu-latest
     needs:
@@ -31,6 +38,13 @@ jobs:
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: install dependencies
         run: npm clean-install
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+      - name: Restore cache (node_modules)
+        id: cache-primes-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}--node-modules-${{ hashFiles('**/package-lock.json') }} ##{ hashFiles('**/package-lock.json') }}
       - name: Test
         run: npm run e2e:headless
-      - run: echo "🍏 This job's status is ${{ job.status }}."
