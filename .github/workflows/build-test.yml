@@ -111,7 +111,7 @@ jobs:
             cd "$REPO_DIR"
           fi
 
-
+          cd "$REPO_DIR"
           npm install
 
           cd ~/cesi-cda2
