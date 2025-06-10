@@ -113,8 +113,8 @@ jobs:
           cd "$REPO_DIR"
           npm install
 
+          pm2
           npm run build
 
           echo "Starting/restarting application..."
           pm2 restart npm || pm2 start npm -- run start
-          '
