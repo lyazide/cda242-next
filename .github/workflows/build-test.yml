@@ -114,10 +114,8 @@ jobs:
           cd "$REPO_DIR"
           npm install
 
-          cd ~/cesi-cda2
-          git pull origin main
-          npm install
+          npm run build
 
           echo "Starting/restarting application..."
-          pm2 restart server.js || pm2 start server.js
+          pm2 restart npm 
           '
