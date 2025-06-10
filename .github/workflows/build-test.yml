@@ -118,3 +118,4 @@ jobs:
 
           echo "Starting/restarting application..."
           pm2 restart npm || pm2 start npm -- run start
+          '
