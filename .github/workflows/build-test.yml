@@ -116,5 +116,5 @@ jobs:
           npm run build
 
           echo "Starting/restarting application..."
-          pm2 restart npm 
+          pm2 restart npm || pm2 start npm -- run start
           '
