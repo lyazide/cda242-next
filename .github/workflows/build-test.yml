@@ -100,7 +100,7 @@ jobs:
 
           REPO_URL="https://github.com/lyazide/cda242-next.git"
           BRANCH="main"
-          REPO_DIR="$HOME/cesi-cda2"
+          REPO_DIR="$HOME/cda242-next"
 
           if [ -d "$REPO_DIR/.git" ]; then
             cd "$REPO_DIR"
