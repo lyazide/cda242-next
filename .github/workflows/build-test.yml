@@ -107,7 +107,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            cd prod
+            cd test
             sudo docker compose -f docker-compose.test.yml pull
             sudo docker compose -f docker-compose.test.yml up -d
 
