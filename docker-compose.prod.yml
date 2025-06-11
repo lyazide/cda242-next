@@ -1,0 +1,9 @@
+services:
+  next-app:
+    image: ghcr.io/lyazide/cda242-next/next
+    container_name: next-cda242
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
