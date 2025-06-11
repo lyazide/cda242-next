@@ -1,10 +1,13 @@
 name: GitHub Actions Demo
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: [push]
+on: 
+  push:
+    branches:
+      - main
+      - develop
 jobs:
   Build:
     runs-on: ubuntu-latest
-
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
@@ -145,6 +148,9 @@ jobs:
   #         echo "Starting/restarting application..."
   #         pm2 restart npm || pm2 start npm -- run start
   #         '
+
+
+
   deploy-prod:
     runs-on: ubuntu-latest
     needs:
