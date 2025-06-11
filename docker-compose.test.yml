@@ -1,6 +1,6 @@
 services:
   next-app:
-    image: ghcr.io/lyazide/cda242-next/next
+    image: ghcr.io/lyazide/cda242-next/next:develop
     container_name: next_develop-cda242
     ports:
       - "3000:3000"
