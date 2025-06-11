@@ -149,12 +149,27 @@ jobs:
   #         pm2 restart npm || pm2 start npm -- run start
   #         '
 
+  deploy-develop:
+    runs-on: ubuntu-latest
+    needs: build-push-docker
+    if: github.ref == 'refs/heads/develop'  # Exécuter uniquement sur develop
+    steps:
+      - uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            cd prod
+            sudo docker compose -f docker-compose.yml pull
+            sudo docker compose -f docker-compose.yml up -d
 
 
   deploy-prod:
     runs-on: ubuntu-latest
     needs:
       - build-push-docker
+    if: github.ref == 'refs/heads/main'  # Exécuter uniquement sur main
     steps:
       - uses: appleboy/ssh-action@v1
         with:

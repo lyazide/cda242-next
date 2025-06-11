@@ -73,3 +73,56 @@ jobs:
           name: Download cypress test failed screenshots on ${{ matrix.browser }}
           path: cypress/screenshots/
           retention-days: 5
+
+  build-push-docker:
+    runs-on: ubuntu-latest
+    needs: Test
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: next
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/cda242-next/next_{{github.ref}}:latest
+
+  deploy-develop:
+    runs-on: ubuntu-latest
+    needs: build-push-docker
+    if: github.ref == 'refs/heads/develop' # Exécuter uniquement sur develop
+    steps:
+      - uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            cd prod
+            sudo docker compose -f docker-compose.test.yml pull
+            sudo docker compose -f docker-compose.test.yml up -d
+
+  deploy-prod:
+    runs-on: ubuntu-latest
+    needs:
+      - build-push-docker
+    if: github.ref == 'refs/heads/main' # Exécuter uniquement sur main
+    steps:
+      - uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            cd prod
+            sudo docker compose -f docker-compose.prod.yml pull
+            sudo docker compose -f docker-compose.prod.yml up -d
