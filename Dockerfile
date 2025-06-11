@@ -15,7 +15,7 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 
-RUN npm install --omit=dev
+RUN npm ci --omit=dev
 
 RUN npm run build
 
@@ -26,14 +26,14 @@ EXPOSE 3000
 WORKDIR /app
 
 # Copie uniquement les fichiers indispensables pour l'exécution
-COPY --from=builder /app/package.json /app/package-lock.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
+
 COPY --from=builder /app/public ./public
 
+COPY --from=builder /app/.next/standalone /app/
+COPY --from=builder /app/.next/static /app/.next/static
 
 COPY docker/next/entrypoint.sh /usr/local/bin/entrypoint
 RUN chmod +x /usr/local/bin/entrypoint
 
 ENTRYPOINT [ "entrypoint" ]
-CMD [ "npm", "run", "start"]
+CMD [ "node", "server.js"]
