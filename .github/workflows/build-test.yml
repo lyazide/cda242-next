@@ -1,10 +1,13 @@
 name: GitHub Actions Demo
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: [push]
+on:
+  push:
+    branches:
+      - main
+      - develop
 jobs:
   Build:
     runs-on: ubuntu-latest
-
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
@@ -26,29 +29,6 @@ jobs:
             node_modules
             /home/runner/.cache/Cypress
           key: ${{ runner.os }}--node-modules-${{ hashFiles('**/package-lock.json') }} ##{ hashFiles('**/package-lock.json') }}
-  build-push-docker:
-    runs-on: ubuntu-latest
-    needs: Test
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Docker Login
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: next
-          push: true
-          tags: ghcr.io/${{ github.repository_owner }}/cda242-next/next:latest
-  #          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/cda242-next:cache
-  #          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/cda242-next:cache,mode=max
 
   Test:
     runs-on: ubuntu-latest
@@ -93,62 +73,49 @@ jobs:
           name: Download cypress test failed screenshots on ${{ matrix.browser }}
           path: cypress/screenshots/
           retention-days: 5
-  # Deploy:
-  #   runs-on: ubuntu-latest
-  #   needs:
-  #     - Test
-  #   steps:
-  #     - uses: actions/checkout@v2
 
-  #     - name: Deploy to EC2
-  #       env:
-  #         PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
-  #         HOST: ${{ secrets.EC2_HOST }}
-  #         USER: ${{ secrets.EC2_USER }}
-  #       run: |
-  #         echo "$PRIVATE_KEY" > github-ec2.pem && chmod 600 github-ec2.pem
-  #         ssh -o StrictHostKeyChecking=no -i github-ec2.pem ${USER}@${HOST} '
-  #         echo "Current directory: $(pwd)"
-  #         echo "Listing home directory:"
-  #         ls -la ~
+  build-push-docker:
+    runs-on: ubuntu-latest
+    needs: Test
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: next
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/cda242-next/next:${{github.ref_name}}
 
-  #         echo "Installing Node.js..."
-  #         if ! command -v nvm &> /dev/null; then
-  #           curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-  #           export NVM_DIR="$HOME/.nvm"
-  #           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-  #         fi
+  deploy-develop:
+    runs-on: ubuntu-latest
+    needs: build-push-docker
+    if: github.ref == 'refs/heads/develop' # Exécuter uniquement sur develop
+    steps:
+      - uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            cd test
+            sudo docker compose -f docker-compose.test.yml pull
+            sudo docker compose -f docker-compose.test.yml up -d
 
-  #         echo "Installing PM2..."
-  #         if ! command -v pm2 &> /dev/null; then
-  #         npm install -g pm2
-  #         fi
-
-  #         REPO_URL="https://github.com/lyazide/cda242-next.git"
-  #         BRANCH="main"
-  #         REPO_DIR="$HOME/cda242-next"
-
-  #         if [ -d "$REPO_DIR/.git" ]; then
-  #           cd "$REPO_DIR"
-  #           git pull origin "$BRANCH"
-  #         else
-  #           git clone "$REPO_URL" "$REPO_DIR"
-  #           cd "$REPO_DIR"
-  #         fi
-
-  #         cd "$REPO_DIR"
-  #         npm install
-
-  #         pm2
-  #         npm run build
-
-  #         echo "Starting/restarting application..."
-  #         pm2 restart npm || pm2 start npm -- run start
-  #         '
   deploy-prod:
     runs-on: ubuntu-latest
     needs:
       - build-push-docker
+    if: github.ref == 'refs/heads/main' # Exécuter uniquement sur main
     steps:
       - uses: appleboy/ssh-action@v1
         with:
